@@ -1,188 +1,177 @@
 # Linkzen
 
-Linkzen is a personal AI assistant for LinkedIn workflows, built with Python, FastAPI, RAG, ChromaDB, and the DeepSeek API.
+Linkzen is a personal AI assistant I built mainly to help me grow my LinkedIn presence while keeping the cost of using AI low.
 
-It combines **retrieval-augmented generation (RAG)** with a persistent **memory system**, allowing the assistant to use both a private knowledge base and information it has learned about the user.
+The project combines LinkedIn-focused tools with RAG, a private knowledge base, memory, and other AI features. I also use it as a way to learn about AI engineering by building something that I actually use.
 
-The project is designed as a local application rather than a hosted service.
+The LinkedIn research and knowledge I use with Linkzen is private and is not included in this repository. The application provides the tools and RAG system, while each user can build their own knowledge base.
 
-## Features
+## What is Linkzen?
 
-### LinkedIn workspace
+The main focus of Linkzen is helping with different parts of my LinkedIn workflow.
 
-Linkzen provides separate tools for different LinkedIn tasks:
+It includes tools for:
 
-- **Analyse Profile** — analyse information supplied about a LinkedIn profile and separate observations from recommendations.
-- **Create Post** — generate LinkedIn posts using retrieved knowledge, user preferences, and relevant memory.
-- **Analyse Post** — analyse an existing LinkedIn post. Audience, intent, and performance metrics can optionally be supplied and are considered separately from the post itself.
-- **Post Ideas** — generate ideas using the user's context and retrieved knowledge.
-- **Make a Comment** — generate several short, natural comment options rather than generic praise.
-- **Reply to a Message** — help formulate replies to LinkedIn messages.
-- **Ask Knowledge** — answer questions using the project's knowledge base when relevant.
+- Analysing a LinkedIn profile
+- Creating LinkedIn posts
+- Analysing posts
+- Generating post ideas
+- Writing comments
+- Replying to messages
+- Asking questions about the knowledge base
 
-### RAG knowledge system
+Alongside the LinkedIn workspace, Linkzen also has a general chat and a knowledge workspace that I use for learning and working with information I have collected.
 
-The RAG pipeline can work with:
+The goal is to have an AI assistant that can work with useful, relevant information rather than relying only on what the language model already knows.
 
-- Markdown files
-- Text files
-- PDF documents
+## Screenshots
 
-Documents are cleaned, split into chunks, embedded using `sentence-transformers/all-MiniLM-L6-v2`, and stored in ChromaDB.
+![Linkzen main interface](screenshots/main.png)
 
-The indexing system tracks document hashes so that changed or new documents can be re-indexed without unnecessarily processing everything again.
+![LinkedIn workspace](screenshots/linkedin-workspace.png)
 
-The public repository contains only the **knowledge directory structure**. The actual knowledge documents are private and are intentionally excluded from Git.
+![Knowledge workspace](screenshots/knowledge-workspace.png)
 
-### Memory
+## Why I built it
 
-Linkzen has a separate memory system for information about the user.
+I originally built Linkzen because I wanted an AI tool that could help me grow my LinkedIn presence without spending a lot on AI services.
 
-Memory can include:
+At the same time, I wanted to learn how AI applications are actually built. This gave me a reason to work with RAG, embeddings, vector databases, document processing, APIs, memory, testing and other parts of an AI application.
 
-- User preferences
-- Relevant personal context
-- Importance
-- Timestamps
-- Retrieved relevant memories
+Rather than building a small demonstration, I wanted to build something that I could actually use.
 
-This allows the assistant to use information about the user without putting all of that information into every prompt manually.
+## How RAG fits into Linkzen
 
-### Usage tracking
+When relevant knowledge is available, Linkzen can retrieve information from the user's local knowledge base before sending a request to the language model.
 
-The application also tracks API usage and token information so that DeepSeek usage and costs can be monitored.
-
-## Architecture
+The general flow is:
 
 ```text
-                         ┌──────────────────┐
-                         │   Web Interface   │
-                         │  HTML / CSS / JS  │
-                         └────────┬─────────┘
-                                  │
-                                  ▼
-                         ┌──────────────────┐
-                         │     FastAPI      │
-                         │    server.py     │
-                         └────────┬─────────┘
-                                  │
-                                  ▼
-                         ┌──────────────────┐
-                         │     Assistant    │
-                         │    assistant.py  │
-                         └──────┬─────┬─────┘
-                                │     │
-                 ┌──────────────┘     └──────────────┐
-                 ▼                                   ▼
-        ┌─────────────────┐                 ┌─────────────────┐
-        │       RAG       │                 │     Memory      │
-        │ ChromaDB +      │                 │  User context   │
-        │ embeddings      │                 │  & preferences  │
-        └────────┬────────┘                 └────────┬────────┘
-                 │                                   │
-                 └────────────────┬──────────────────┘
-                                  ▼
-                         ┌──────────────────┐
-                         │   DeepSeek API   │
-                         └──────────────────┘
+User
+  ↓
+Linkzen interface
+  ↓
+FastAPI backend
+  ↓
+Retrieve relevant knowledge
+  ↓
+ChromaDB + local embeddings
+  ↓
+Relevant context
+  ↓
+DeepSeek API
+  ↓
+Response
 ```
+
+Documents are processed and converted into embeddings locally. ChromaDB stores the resulting information so that Linkzen can search for relevant parts later.
+
+The retrieved information is then provided to the language model as context.
+
+## Technology
+
+| Technology              | Purpose                   |
+| ----------------------- | ------------------------- |
+| Python                  | Main application language |
+| FastAPI                 | Backend API               |
+| HTML / CSS / JavaScript | Frontend                  |
+| DeepSeek API            | Language model            |
+| ChromaDB                | Vector database           |
+| Sentence Transformers   | Local embeddings          |
+| PyPDF                   | PDF processing            |
+| Uvicorn                 | Local server              |
+| unittest                | Testing                   |
 
 ## Project structure
 
 ```text
 Linkzen/
-├── assistant.py          # AI tool routing and DeepSeek integration
-├── chat_images.py        # Image handling for conversations
-├── knowledge.py          # Knowledge file discovery and management
-├── memory.py             # Persistent user memory
-├── rag.py                # RAG indexing and document processing
-├── retrieval.py          # Knowledge retrieval
-├── server.py             # FastAPI application
-├── settings.py           # Application settings
-├── usage.py              # API usage tracking
-├── web_reader.py         # Web content retrieval
-│
-├── knowledge/            # Private knowledge base structure
-│   ├── aws/
-│   ├── linkedin/
-│   ├── documents/
-│   └── other/
-│
-├── static/                # Web interface
-│
-├── tests/                 # Automated tests
-│
-├── requirements.txt       # Python dependencies
-├── .env.example           # Environment variable template
-└── start-linkzen.sh      # Portable launcher
+├── assistant.py
+├── server.py
+├── rag.py
+├── retrieval.py
+├── knowledge.py
+├── memory.py
+├── usage.py
+├── web_reader.py
+├── chat_images.py
+├── settings.py
+├── static/
+├── knowledge/
+├── tests/
+├── screenshots/
+├── requirements.txt
+├── .env.example
+├── start-linkzen.sh
+└── start-linkzen.ps1
 ```
 
 ## Requirements
 
 - Python 3.12+
 - A DeepSeek API key
-- Internet access for the DeepSeek API
-- Sufficient disk space for the embedding model and ChromaDB
+- Internet access for the language model API
+- Enough local storage for the Python environment, embedding model and RAG database
 
-The embedding model runs locally. The language model is accessed through the DeepSeek API.
+The embedding model runs locally, while the language model is accessed through the DeepSeek API.
 
 ## Installation
 
-Clone the repository and enter the project directory:
+### Linux / macOS
 
 ```bash
 git clone https://github.com/Sammy-769/Linkzen.git
 cd Linkzen
-```
 
-Create a virtual environment:
-
-```bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
 
-Install the dependencies:
-
-```bash
 pip install -r requirements.txt
-```
 
-Create your environment file:
-
-```bash
 cp .env.example .env
 ```
 
-Then add your DeepSeek API key to `.env`:
+### Windows
+
+```powershell
+git clone https://github.com/Sammy-769/Linkzen.git
+cd Linkzen
+
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+
+Copy-Item .env.example .env
+```
+
+Add your API key to `.env`:
 
 ```text
 DEEPSEEK_API_KEY=your_api_key_here
 ```
 
-Do not commit `.env` to Git. It is intentionally ignored by `.gitignore`.
+Do not commit your `.env` file or API key to Git.
 
 ## Running Linkzen
 
-The project includes a launcher:
+### Linux / macOS
 
 ```bash
 ./start-linkzen.sh
 ```
 
-The launcher uses paths relative to the project directory, so it does not depend on the original developer's machine path.
+### Windows
+
+```powershell
+.\start-linkzen.ps1
+```
+
+The launcher starts the local FastAPI server and opens Linkzen in the browser.
 
 ## Knowledge base
 
-The repository intentionally does not contain the actual knowledge documents used by the developer.
-
-To use your own knowledge base, place supported files inside the appropriate directories under:
-
-```text
-knowledge/
-```
-
-For example:
+The knowledge base is organised into different categories:
 
 ```text
 knowledge/
@@ -192,71 +181,69 @@ knowledge/
 └── other/
 ```
 
-The actual files are ignored by Git so that private notes, source material, and personal documents are not published accidentally.
+Users can add their own documents and information to these areas and use them through Linkzen's retrieval system.
+
+## Memory
+
+Linkzen also has a local memory system separate from the RAG knowledge base.
+
+This allows the application to retain useful information about the user and previous work.
 
 ## Testing
 
-The project includes automated tests covering the main components.
+The project has a test suite covering parts of the backend, retrieval, memory, settings, usage tracking and LinkedIn-related functionality.
 
-Run the full test suite with:
+Run the tests with:
 
 ```bash
 python -m unittest discover -s tests
 ```
 
-The current test suite contains **59 tests** covering areas including:
+## Privacy and security
 
-- Knowledge handling
-- RAG retrieval
-- Memory
-- LinkedIn tools
-- Usage tracking
+Private application data is kept out of Git, including:
+
+- API keys and `.env`
+- Local memory
+- Usage data
 - Settings
-- Web reading
-- Image handling
-
-## Design principles
-
-Linkzen is intentionally built around a few principles:
-
-**Personal context matters.**
-The assistant should understand the user's preferences and context rather than treating every request as completely independent.
-
-**Retrieved information should support generation.**
-The assistant uses RAG to retrieve relevant information instead of putting an entire knowledge base into every prompt.
-
-**Private data stays local.**
-Personal memory, usage information, API keys, the ChromaDB database, and the actual knowledge files are excluded from the public repository.
-
-**Tools should have different responsibilities.**
-Profile analysis, post creation, post analysis, commenting, messaging, and knowledge questions have different requirements and therefore use separate tool behaviours.
+- ChromaDB data
+- Python virtual environments
 
 ## Current limitations
 
-Linkzen is currently a personal development project rather than a production service.
+Linkzen is still a personal project and is not intended to be a production multi-user service.
 
-Some limitations include:
+The quality of the AI's results depends on the information available to it, the retrieval quality and the language model being used.
 
-- The language model depends on the DeepSeek API.
-- The knowledge base is maintained locally.
-- The application has not been designed for multiple users.
-- The current web interface is intentionally lightweight.
-- Production authentication and deployment infrastructure are not included.
+The project is also still being developed, so some parts may change as I continue using and improving it.
 
 ## Roadmap
 
-Possible future improvements include:
+Some areas I want to continue improving include:
 
-- Better memory management and user-controlled memory
-- More sophisticated retrieval and ranking
-- Additional LinkedIn workflows
-- Improved web research capabilities
-- Better UI and conversation management
-- More comprehensive evaluation of generated content
-- Deployment and multi-user support
+- Better retrieval quality
+- More reliable LinkedIn tools
+- More tests
+- Better cross-platform setup
+- Improvements to the interface and user experience
+- Further reduction of AI/API costs
 
-## Why I built it
+## What I am learning from the project
 
-I built Linkzen as a way to explore how an AI assistant can combine **RAG, persistent memory, external LLMs, local embeddings, and application-specific tools** into one practical system.
+Building Linkzen has given me practical experience with:
 
-The project is also part of my learning journey towards building real-world AI and cloud applications.
+- RAG systems
+- Embeddings
+- Vector databases
+- Document processing
+- API integration
+- Prompt design
+- Conversation history
+- Local memory
+- Usage and token tracking
+- Testing
+- Git and GitHub
+- Cross-platform application setup
+
+The project is still evolving, but it has been useful because I am learning these concepts while building something that I actually use.
