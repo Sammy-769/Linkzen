@@ -131,7 +131,7 @@ The embedding model runs locally. The language model is accessed through the Dee
 Clone the repository and enter the project directory:
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/Sammy-769/Linkzen.git
 cd Linkzen
 ```
 
