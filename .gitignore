@@ -14,5 +14,12 @@ rag_manifest.json
 settings.json
 
 knowledge/**
-!knowledge/**/
-!knowledge/**/.gitkeep
+!knowledge/.gitkeep
+!knowledge/aws/
+!knowledge/aws/.gitkeep
+!knowledge/documents/
+!knowledge/documents/.gitkeep
+!knowledge/linkedin/
+!knowledge/linkedin/.gitkeep
+!knowledge/other/
+!knowledge/other/.gitkeep
