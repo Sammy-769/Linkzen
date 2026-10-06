@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Linkzen</title>
+
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" type="image/png" href="/static/icon.png" />
+  </head>
+
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Linkzen</h2>
+
+          <div class="usage-monitor" aria-label="DeepSeek usage monitor">
+            <div id="usage-clock" class="usage-metric usage-clock">
+              <span class="usage-value"
+                ><span aria-hidden="true">🕐</span> --:--</span
+              >
+              <span id="usage-peak" class="usage-label">Off-peak</span>
+            </div>
+            <div id="usage-month" class="usage-metric">
+              <span id="usage-month-value" class="usage-value"
+                ><span aria-hidden="true">🪙</span> 0</span
+              >
+              <span class="usage-label">This month</span>
+            </div>
+            <div class="usage-metric">
+              <span id="usage-average-value" class="usage-value"
+                ><span aria-hidden="true">📊</span> 0</span
+              >
+              <span class="usage-label">Daily avg</span>
+            </div>
+          </div>
+
+          <button id="new-chat" class="new-chat">+ New chat</button>
+        </div>
+
+        <label class="conversation-search" for="conversation-search-input">
+          <span aria-hidden="true">⌕</span>
+          <input
+            id="conversation-search-input"
+            type="search"
+            placeholder="Search conversations"
+            autocomplete="off"
+          />
+          <button
+            id="clear-conversation-search"
+            type="button"
+            aria-label="Clear search"
+            hidden
+          >
+            ×
+          </button>
+        </label>
+
+        <div id="conversation-list" class="conversation-list"></div>
+
+        <div class="sidebar-footer">
+          <button id="memories-button" class="sidebar-button">
+            🧠 Memories
+          </button>
+
+          <button id="knowledge-button" class="sidebar-button">
+            📚 Knowledge
+          </button>
+
+          <button id="linkedin-button" class="sidebar-button">
+            💼 LinkedIn
+          </button>
+
+          <button id="settings-button" class="sidebar-button">
+            ⚙️ Settings
+          </button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div id="memories-panel" class="memories-panel">
+          <div class="memories-header">
+            <div>
+              <h2>Memories</h2>
+              <p>Things your AI remembers about you.</p>
+            </div>
+
+            <button id="close-memories">×</button>
+          </div>
+
+          <div class="add-memory">
+            <textarea
+              id="memory-input"
+              placeholder="Write a memory..."
+              rows="3"
+            ></textarea>
+
+            <button id="save-memory">Save memory</button>
+          </div>
+
+          <div id="memory-list" class="memory-list"></div>
+        </div>
+
+        <div id="settings-panel" class="settings-panel" aria-hidden="true">
+          <div class="settings-header">
+            <div>
+              <h2>Settings</h2>
+              <p>Control how memory is managed.</p>
+            </div>
+
+            <button id="close-settings" aria-label="Close settings">×</button>
+          </div>
+
+          <div class="settings-content">
+            <label class="setting-row" for="automatic-memory">
+              <span>
+                <strong>Automatic memory</strong>
+                <small>Save durable facts from chat automatically.</small>
+              </span>
+              <input id="automatic-memory" type="checkbox" />
+            </label>
+
+            <label class="setting-row" for="rag-enabled">
+              <span>
+                <strong>Use knowledge (RAG)</strong>
+                <small
+                  >Retrieve relevant saved files for answers and LinkedIn
+                  tools.</small
+                >
+              </span>
+              <input id="rag-enabled" type="checkbox" />
+            </label>
+
+            <label class="setting-row" for="memory-debug">
+              <span>
+                <strong>Memory debug mode</strong>
+                <small
+                  >Print retrieval IDs, scores, and source paths only.</small
+                >
+              </span>
+              <input id="memory-debug" type="checkbox" />
+            </label>
+
+            <div class="global-prompt-setting">
+              <label for="global-prompt">
+                <strong>Global Prompt</strong>
+                <small
+                  >Additional system instructions for Normal Chat only.</small
+                >
+              </label>
+              <textarea
+                id="global-prompt"
+                rows="5"
+                maxlength="8000"
+                placeholder="Add instructions for Normal Chat..."
+              ></textarea>
+              <div class="global-prompt-footer">
+                <p id="global-prompt-status" aria-live="polite"></p>
+                <button id="save-global-prompt" type="button">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="knowledge-panel" class="knowledge-panel" aria-hidden="true">
+          <div class="knowledge-header">
+            <div>
+              <h2>Knowledge</h2>
+              <p>Knowledge files and folders</p>
+            </div>
+
+            <button id="close-knowledge" aria-label="Close knowledge">×</button>
+          </div>
+
+          <nav
+            id="knowledge-breadcrumbs"
+            class="knowledge-breadcrumbs"
+            aria-label="Knowledge folder path"
+          ></nav>
+
+          <div class="knowledge-toolbar">
+            <form
+              id="knowledge-create-folder-form"
+              class="knowledge-create-folder"
+            >
+              <input
+                id="knowledge-folder-name"
+                type="text"
+                placeholder="New folder name"
+                aria-label="New folder name"
+                required
+              />
+              <button type="submit">＋ Folder</button>
+            </form>
+            <form id="knowledge-upload-form" class="knowledge-upload">
+              <input id="knowledge-file" type="file" accept=".txt,.md,.pdf" />
+              <button id="upload-knowledge" type="submit">↑ Upload</button>
+              <button id="reindex-all-knowledge" type="button">
+                ↻ Re-index all
+              </button>
+            </form>
+          </div>
+
+          <p
+            id="knowledge-status"
+            class="knowledge-status"
+            aria-live="polite"
+          ></p>
+
+          <div id="knowledge-list" class="knowledge-list"></div>
+
+          <dialog id="knowledge-move-dialog" class="knowledge-move-dialog">
+            <form id="knowledge-move-form">
+              <h3>Move item</h3>
+              <label for="knowledge-move-destination">Destination folder</label>
+              <select id="knowledge-move-destination" required></select>
+              <div class="knowledge-dialog-actions">
+                <button id="knowledge-move-cancel" type="button">Cancel</button>
+                <button type="submit">Move</button>
+              </div>
+            </form>
+          </dialog>
+        </div>
+
+        <section id="linkedin-panel" class="linkedin-panel" aria-hidden="true">
+          <div class="linkedin-header">
+            <div>
+              <h2>LinkedIn Workspace</h2>
+              <p>Analyse profiles, create content, and use saved knowledge.</p>
+            </div>
+            <button id="close-linkedin" aria-label="Close LinkedIn workspace">
+              ×
+            </button>
+          </div>
+
+          <div class="linkedin-tools" role="group" aria-label="LinkedIn tools">
+            <button
+              class="linkedin-tool"
+              type="button"
+              data-action="analyze_profile"
+            >
+              👤 Analyze Profile
+            </button>
+            <button
+              class="linkedin-tool active"
+              type="button"
+              data-action="create_post"
+            >
+              ✍️ Create Post
+            </button>
+            <button
+              class="linkedin-tool"
+              type="button"
+              data-action="analyze_post"
+            >
+              🔍 Analyse Post
+            </button>
+            <button
+              class="linkedin-tool"
+              type="button"
+              data-action="post_ideas"
+            >
+              💡 Post Ideas
+            </button>
+            <button
+              class="linkedin-tool"
+              type="button"
+              data-action="make_comment"
+            >
+              💬 Make a Comment
+            </button>
+            <button
+              class="linkedin-tool"
+              type="button"
+              data-action="reply_to_message"
+            >
+              ↩️ Reply to a Message
+            </button>
+            <button
+              class="linkedin-tool"
+              type="button"
+              data-action="ask_knowledge"
+            >
+              🧠 Ask Knowledge
+            </button>
+          </div>
+
+          <details
+            id="linkedin-prompt-editor"
+            class="linkedin-config linkedin-prompt-editor"
+          >
+            <summary>Edit tool system prompt</summary>
+            <label for="linkedin-prompt-input"
+              >System prompt for this tool</label
+            >
+            <textarea id="linkedin-prompt-input" rows="5"></textarea>
+            <div class="linkedin-config-actions">
+              <p id="linkedin-prompt-status" aria-live="polite"></p>
+              <button id="save-linkedin-prompt" type="button">Save</button>
+              <button id="reset-linkedin-prompt" type="button">
+                Reset to Default
+              </button>
+              <button id="hide-linkedin-prompt" type="button">Hide</button>
+            </div>
+          </details>
+
+          <section
+            class="linkedin-history-section"
+            aria-label="Selected tool history"
+          >
+            <button id="linkedin-new-session" type="button">
+              ＋ New session
+            </button>
+            <details id="linkedin-history-details">
+              <summary id="linkedin-history-summary">Previous sessions</summary>
+              <div
+                id="linkedin-history-list"
+                class="linkedin-history-list"
+              ></div>
+            </details>
+          </section>
+
+          <form id="linkedin-form" class="linkedin-form">
+            <label id="linkedin-input-label" for="linkedin-input"
+              >Topic, idea, or rough notes</label
+            >
+            <textarea
+              id="linkedin-input"
+              rows="7"
+              placeholder="Share a topic, idea, or rough notes..."
+            ></textarea>
+            <div id="linkedin-instructions-field" hidden>
+              <label
+                id="linkedin-instructions-label"
+                for="linkedin-instructions"
+                >Instructions or context</label
+              >
+              <textarea
+                id="linkedin-instructions"
+                rows="3"
+                placeholder="Add optional instructions or context..."
+              ></textarea>
+            </div>
+            <div id="linkedin-performance-field" hidden>
+              <label for="linkedin-performance-data"
+                >Performance data (optional)</label
+              >
+              <textarea
+                id="linkedin-performance-data"
+                rows="3"
+                placeholder="Impressions, reactions, comments, reposts, profile views, followers gained..."
+              ></textarea>
+              <p class="linkedin-field-help">
+                Metrics can add context, but do not by themselves explain why a
+                post performed as it did.
+              </p>
+            </div>
+            <label class="linkedin-image-input" for="linkedin-images">
+              Add screenshots or images
+              <input
+                id="linkedin-images"
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                multiple
+              />
+            </label>
+            <p
+              id="linkedin-image-status"
+              class="linkedin-image-status"
+              aria-live="polite"
+            ></p>
+            <div class="linkedin-form-footer">
+              <p
+                id="linkedin-status"
+                class="linkedin-status"
+                aria-live="polite"
+              ></p>
+              <button id="linkedin-submit" type="submit">Generate post</button>
+            </div>
+          </form>
+
+          <section class="linkedin-result-section" aria-live="polite">
+            <h3 id="linkedin-result-title">Result</h3>
+            <div id="linkedin-result" class="linkedin-result">
+              Your result will appear here.
+            </div>
+          </section>
+        </section>
+
+        <header class="header">
+          <button id="mobile-menu" class="mobile-menu">☰</button>
+
+          <div>
+            <h1 id="chat-title">New chat</h1>
+            <span>Personal assistant</span>
+          </div>
+        </header>
+
+        <section id="chat" class="chat">
+          <div id="welcome" class="welcome">
+            <h2>How can I help?</h2>
+
+            <p>
+              Ask me about your knowledge, AWS learning, LinkedIn content, or
+              anything else.
+            </p>
+          </div>
+        </section>
+
+        <form id="chat-form" class="input-area">
+          <div id="chat-image-preview" class="chat-image-preview" hidden></div>
+          <button
+            id="chat-attach-image"
+            class="chat-attach-image"
+            type="button"
+            aria-label="Attach image"
+            title="Attach image"
+          >
+            📎
+          </button>
+          <textarea
+            id="message"
+            placeholder="Message Linkzen..."
+            rows="1"
+            autocomplete="off"
+          ></textarea>
+
+          <input
+            id="chat-image-input"
+            class="visually-hidden"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+          />
+          <button type="submit">Send</button>
+        </form>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
