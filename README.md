@@ -40,6 +40,12 @@ At the same time, I wanted to learn how AI applications are actually built. This
 
 Rather than building a small demonstration, I wanted to build something that I could actually use.
 
+## The story behind Linkzen
+
+If you want to know **why I built Linkzen, how the idea started, and how I ended up building it**, I wrote the full story here:
+
+[**How and Why I Built Linkzen**](docs/LINKZEN.md)
+
 ## How RAG fits into Linkzen
 
 When relevant knowledge is available, Linkzen can retrieve information from the user's local knowledge base before sending a request to the language model.
